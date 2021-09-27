@@ -4,6 +4,7 @@ import { Server } from "@overnightjs/core";
 import helmet from "helmet";
 import cors from "cors";
 import { connect } from './config/mongo';
+import { run } from './utils/initialize'
 
 export class AppServer extends Server {
     private readonly SERVER_STARTED = "Server started on port: ";
@@ -36,5 +37,6 @@ export class AppServer extends Server {
         this.app.listen(port, () => {
             console.log(this.SERVER_STARTED + port);
         });
+        run();
     }
 }

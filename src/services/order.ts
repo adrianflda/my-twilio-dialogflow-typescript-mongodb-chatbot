@@ -1,6 +1,6 @@
 import { Order, OrderModel } from "../models";
 
-export const getOrder = async (orderCode: number): Promise<Order | null> => {
+export const getOrder = async (orderCode: string): Promise<Order | null> => {
     const order: Order | null = await OrderModel.findOne({ticketId: orderCode});
     return order;
 }

@@ -3,7 +3,7 @@ import { Controller, Post } from "@overnightjs/core";
 import { runQuery } from "../utils/dialogflow";
 import { sendMessage } from "../utils/twilio";
 
-@Controller("api/bot")
+@Controller("api/twilio/webhook")
 export class BotController {
 
     @Post()
@@ -15,12 +15,12 @@ export class BotController {
         // Here we're sending the received message to Dialogflow so that it can be identified against an Intent.
         runQuery(Body, From)
             .then((result: any) => {
-                console.log(result);
-                
+                console.log('result from dialogflow: ', { result });
+
                 // We send the fulfilment text received back to our user via Twilio
                 sendMessage(From, To, result.fulfillmentText)
                     .then(res => {
-                        console.log(res);
+                        console.log('message sent: ', res);
                     })
                     .catch(error => {
                         console.error("error is ", error);
