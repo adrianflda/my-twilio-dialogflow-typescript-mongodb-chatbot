@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  mongo-db:
+    image: mongo
+    restart: always
+    container_name: mongo-db
+    ports:
+      - 27017:27017 
+    volumes:
+      - mongo-db:/data/db
+
+  express-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./src:/home/node/app/src
+      - ./nodemon.json:/home/node/app/nodemon.json
+    container_name: express-api
+    expose:
+      - '3000'
+    ports:
+      - '3000:3000'
+    command: npm run dev:watch
+    depends_on:
+      - mongo-db
+    environment:
+      - MONGODB_URI=mongodb://mongo-db/chatbot-db
+    links:
+      - "mongo-db:mongo-db"
+
+volumes: 
+  mongo-db:
+    name: mongo-db

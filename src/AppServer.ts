@@ -1,14 +1,17 @@
 import * as bodyParser from "body-parser";
 import * as controllers from "./controllers";
 import { Server } from "@overnightjs/core";
-import { Logger } from "@overnightjs/logger";
-import * as cors from "cors";
+import helmet from "helmet";
+import cors from "cors";
+import { connect } from './config/mongo';
 
 export class AppServer extends Server {
     private readonly SERVER_STARTED = "Server started on port: ";
 
     constructor() {
         super(true);
+        connect();
+        this.app.use(helmet());
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
         this.app.use(cors());
@@ -31,7 +34,7 @@ export class AppServer extends Server {
             res.send(this.SERVER_STARTED + port);
         });
         this.app.listen(port, () => {
-            Logger.Imp(this.SERVER_STARTED + port);
+            console.log(this.SERVER_STARTED + port);
         });
     }
 }
