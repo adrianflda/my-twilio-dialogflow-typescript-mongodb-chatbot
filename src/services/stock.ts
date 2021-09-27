@@ -1,7 +1,7 @@
 import { Stock, StockModel } from "../models";
 
-export const getStock = async (stockCode: number): Promise<Stock | null> => {
-    const stock: Stock | null = await StockModel.findOne({ticketId: stockCode});
+export const getStock = async (productCode: number): Promise<Stock | null> => {
+    const stock: Stock | null = await StockModel.findOne({ code: productCode });
     return stock;
 }
 

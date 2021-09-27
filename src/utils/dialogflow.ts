@@ -13,7 +13,7 @@ export const runQuery = (query: string, number: string) => {
             //const sessionId = uuid.v4();
             const sessionId = number;
             // Create a new session
-            const sessionPath = sessionClient.sessionPath(projectId, sessionId);
+            const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
             // The text query request.
             const request = {
                 session: sessionPath,
