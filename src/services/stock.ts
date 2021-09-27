@@ -18,3 +18,12 @@ export const createStock = async (stock: Stock): Promise<Stock | undefined> => {
         console.log('create stock error: ', error);
     }
 }
+
+export const updateStock = async (productCode: number, amount: number): Promise<Stock | undefined> => {
+    try {
+        const newStock: any = await StockModel.updateOne({ code: productCode }, { stock: amount });
+        return newStock;
+    } catch (error) {
+        console.log('update stock error: ', error);
+    }
+}

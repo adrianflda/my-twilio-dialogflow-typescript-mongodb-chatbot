@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Controller, Post } from "@overnightjs/core";
-import { getProduct, createOrder, getStock } from "../services";
+import { getProduct, createOrder, getStock, updateStock } from "../services";
 import { Order, Product, Stock } from "src/models";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -99,7 +99,7 @@ export class DialogWebhookController {
             }
 
             const stock: Stock | null = await getStock(product.code);
-            if (!stock?.stock) {
+            if (!stock?.stock || stock.stock < orderQuantity) {
                 console.warn('no product available', { stock });
                 fulfillmentText = 'No product on stock, please try with an other product number.'
                 return fulfillmentText;
@@ -115,6 +115,7 @@ export class DialogWebhookController {
             } as Order;
             const order: Order | undefined | null = orderData ? await createOrder(newOrder) : null;
             if (order) {
+                await updateStock(stock.code, stock.stock - orderQuantity)
                 fulfillmentText = `New Order was created ticket: ${order?.ticketId || 'NONE'}.\n Description: ${order?.description || 'NONE'}.`
             }
         } catch (error) {
