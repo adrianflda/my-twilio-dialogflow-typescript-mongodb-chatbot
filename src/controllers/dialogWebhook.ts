@@ -34,7 +34,7 @@ export class DialogWebhookController {
                     fulfillmentText = await this.getProductAndStock(queryResult);
                     break;
                 case Action.Order:
-                    fulfillmentText = await this.createOrder(queryResult, phoneNumber);
+                    fulfillmentText = await this.processOrder(queryResult, phoneNumber);
                     break;
                 default:
                     break;
@@ -69,17 +69,34 @@ export class DialogWebhookController {
         return fulfillmentText;
     }
 
-    private async createOrder(queryResult: any, phoneNumber: string): Promise<string> {
+    private async processOrder(queryResult: any, phoneNumber: string): Promise<string> {
         // Here we will create new Order for product like Order n of #411.
-        console.log(`${ENDPOINT}/order`, { queryResult });
+        console.log(`${ENDPOINT}/orders`, { queryResult });
 
-        const orderData: string = queryResult?.parameters?.Order ? queryResult?.parameters?.Order : '';
-        console.log('Order from dialogflow: ', { orderData });
+        const orderQueries: string = queryResult?.parameters?.Order ? queryResult?.parameters?.Order : '';
+        console.log('Order from dialogflow: ', { orderQueries });
 
+        const orderQueryDetected: string[] = orderQueries.split(',')
+
+        let fulfillmentText: string = '';
+
+        if (!orderQueryDetected.length) {
+            console.log('No order found on this message', { orderQueries, orderQueryDetected });
+            return 'No order was created';
+        }
+
+        for (const orderQuery of orderQueryDetected) {
+            fulfillmentText += await this.createOrder(orderQuery, phoneNumber);
+        }
+
+        return fulfillmentText;
+    }
+
+    private async createOrder(orderQuery: string, phoneNumber: string): Promise<string> {
         let fulfillmentText: string = 'No order was created';
 
         try {
-            const [quantity, productCode] = orderData.split(' of ');
+            const [quantity, productCode] = orderQuery.split(' of ');
             console.log('Order parsed: ', { quantity, productCode });
             console.log(productCode?.split('#'));
 
@@ -109,11 +126,11 @@ export class DialogWebhookController {
                 ticketId: uuidv4(),
                 productId: product.code,
                 quantity: orderQuantity,
-                description: JSON.stringify(orderData),
+                description: JSON.stringify(orderQuery),
                 netPrice: product.value,
                 phone: phoneNumber
             } as Order;
-            const order: Order | undefined | null = orderData ? await createOrder(newOrder) : null;
+            const order: Order | undefined | null = await createOrder(newOrder);
             if (order) {
                 await updateStock(stock.code, stock.stock - orderQuantity)
                 fulfillmentText = `New Order was created ticket: ${order?.ticketId || 'NONE'}.\n Description: ${order?.description || 'NONE'}.`
